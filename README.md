@@ -266,13 +266,6 @@ xgboost>=1.6.0
 joblib>=1.1.0
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
 
 ## 📄 License
 
@@ -280,10 +273,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🙏 Acknowledgments
 
-- ATP for providing comprehensive match data
-- Tennis analytics community for insights
+- jeff sackman for all match data
+- Inspiration from GreenCode on youtube
 - Open source ML libraries (scikit-learn, XGBoost)
 
----
-
-**Built with ❤️ for tennis analytics and machine learning** 
