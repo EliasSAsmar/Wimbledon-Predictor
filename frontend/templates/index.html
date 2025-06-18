@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wimbledon Predictor | AI-Powered Tennis Match Predictions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <i class="fas fa-leaf"></i>
+                <span>Wimbledon Predictor</span>
+            </div>
+            <div class="nav-links">
+                <a href="#predictions" class="nav-link">Predictions</a>
+                <a href="#live-matches" class="nav-link">Live Board</a>
+                <a href="#stats" class="nav-link">Performance</a>
+                <a href="#about" class="nav-link">About</a>
+                <button class="nav-cta">Try Premium</button>
+            </div>
+            <div class="mobile-menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-background">
+            <div class="grass-pattern"></div>
+            <div class="tennis-lines"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-trophy"></i>
+                <span>70.6% Accuracy • RFSR Ensemble • Bias-Free AI</span>
+            </div>
+            <h1 class="hero-title">
+                Predict Tennis Matches with 
+                <span class="gradient-text">Wimbledon Predictor</span>
+            </h1>
+            <p class="hero-subtitle">
+                Advanced RFSR ensemble model combining Random Forest (75%) and Serve/Return analytics (25%). 
+                Trained on 109K+ ATP matches with bias-free predictions and grass court specialization.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary" onclick="scrollToSection('predictions')">
+                    <i class="fas fa-chart-line"></i>
+                    Make Prediction
+                </button>
+                <button class="btn-secondary" onclick="scrollToSection('about')">
+                    <i class="fas fa-play"></i>
+                    See How It Works
+                </button>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number">70.6%</div>
+                    <div class="stat-label">Accuracy</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">0.780</div>
+                    <div class="stat-label">AUC-ROC</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">109K+</div>
+                    <div class="stat-label">Matches</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Match Prediction Section -->
+    <section id="predictions" class="predictions-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Match Prediction</h2>
+                <p>Select two players to get RFSR ensemble predictions with betting odds</p>
+            </div>
+            
+            <div class="prediction-interface">
+                <div class="player-selection">
+                    <div class="player-card player-1">
+                        <div class="player-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search Player 1..." id="player1-input">
+                            <div class="player-dropdown" id="player1-dropdown"></div>
+                        </div>
+                        <div class="player-info" id="player1-info">
+                            <div class="player-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="player-details">
+                                <h3>Select Player 1</h3>
+                                <p>Choose first player</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vs-divider">
+                        <div class="vs-circle">
+                            <span>VS</span>
+                        </div>
+                        <div class="vs-line"></div>
+                    </div>
+
+                    <div class="player-card player-2">
+                        <div class="player-search">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search Player 2..." id="player2-input">
+                            <div class="player-dropdown" id="player2-dropdown"></div>
+                        </div>
+                        <div class="player-info" id="player2-info">
+                            <div class="player-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="player-details">
+                                <h3>Select Player 2</h3>
+                                <p>Choose second player</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="predict-btn" id="predict-btn" disabled>
+                    <i class="fas fa-leaf"></i>
+                    Generate RFSR Prediction
+                </button>
+
+                <div class="prediction-results" id="prediction-results" style="display: none;">
+                    <div class="results-header">
+                        <h3>RFSR Ensemble Results</h3>
+                        <div class="model-tabs">
+                            <button class="tab-btn active" data-model="rfsr">RFSR Ensemble</button>
+                            <button class="tab-btn" data-model="random-forest">Random Forest</button>
+                            <button class="tab-btn" data-model="serve-return">Serve/Return</button>
+                        </div>
+                        <div class="ensemble-info">
+                            <span class="ensemble-weights">RF: 75% • SR: 25%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="win-probability">
+                        <div class="prob-bar">
+                            <div class="prob-fill" id="prob-fill"></div>
+                            <div class="prob-labels">
+                                <span id="player1-prob">50%</span>
+                                <span id="player2-prob">50%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="betting-odds">
+                        <h4>Betting Odds</h4>
+                        <div class="odds-grid">
+                            <div class="odds-type">
+                                <label>American</label>
+                                <div class="odds-values">
+                                    <span id="american-1">+100</span>
+                                    <span id="american-2">+100</span>
+                                </div>
+                            </div>
+                            <div class="odds-type">
+                                <label>Decimal</label>
+                                <div class="odds-values">
+                                    <span id="decimal-1">2.00</span>
+                                    <span id="decimal-2">2.00</span>
+                                </div>
+                            </div>
+                            <div class="odds-type">
+                                <label>Fractional</label>
+                                <div class="odds-values">
+                                    <span id="fractional-1">1/1</span>
+                                    <span id="fractional-2">1/1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prediction-features">
+                        <h4>Key Factors</h4>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <label>ELO Rating Difference</label>
+                                    <div class="feature-bar">
+                                        <div class="feature-fill" style="width: 100%"></div>
+                                    </div>
+                                    <span class="feature-value">+273.4</span>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <label>Grass ELO Difference</label>
+                                    <div class="feature-bar">
+                                        <div class="feature-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span class="feature-value">+341.0</span>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <label>Serve Rating Difference</label>
+                                    <div class="feature-bar">
+                                        <div class="feature-fill" style="width: 75%"></div>
+                                    </div>
+                                    <span class="feature-value">+650.7</span>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-undo"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <label>Return Rating Difference</label>
+                                    <div class="feature-bar">
+                                        <div class="feature-fill" style="width: 70%"></div>
+                                    </div>
+                                    <span class="feature-value">-237.8</span>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <label>Recent Form (Last 10)</label>
+                                    <div class="feature-bar">
+                                        <div class="feature-fill" style="width: 60%"></div>
+                                    </div>
+                                    <span class="feature-value">0.00</span>
+                                </div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">
+                                    <i class="fas fa-trophy"></i>
+                                </div>
+                                <div class="feature-content">
+                                    <label>ATP Ranking Difference</label>
+                                    <div class="feature-bar">
+                                        <div class="feature-fill" style="width: 55%"></div>
+                                    </div>
+                                    <span class="feature-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bias-check">
+                        <h4>Bias Verification</h4>
+                        <div class="bias-indicator">
+                            <div class="bias-status">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Bias-Free Prediction</span>
+                            </div>
+                            <div class="bias-value">0.000</div>
+                        </div>
+                        <p class="bias-explanation">
+                            Our averaging technique ensures predictions are identical regardless of player name order.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Live Matches Board Section -->
+    <section id="live-matches" class="live-matches-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Live Matches Board</h2>
+                <p>Real-time match tracking with RFSR ensemble predictions vs market odds</p>
+                <div class="board-controls">
+                    <button class="filter-btn active" data-filter="all">All Matches</button>
+                    <button class="filter-btn" data-filter="live">Live Now</button>
+                    <button class="filter-btn" data-filter="upcoming">Upcoming</button>
+                    <button class="filter-btn" data-filter="value">Value Bets</button>
+                </div>
+            </div>
+            
+            <div class="matches-board">
+                <div class="board-header">
+                    <div class="header-cell">Match</div>
+                    <div class="header-cell">Status</div>
+                    <div class="header-cell">Market Odds</div>
+                    <div class="header-cell">RFSR Ensemble</div>
+                    <div class="header-cell">Edge</div>
+                    <div class="header-cell">Confidence</div>
+                </div>
+                
+                <div class="match-row" data-status="live">
+                    <div class="match-cell">
+                        <div class="match-players">
+                            <div class="player-matchup">
+                                <div class="player">
+                                    <span class="player-name">C. Alcaraz</span>
+                                    <span class="player-rank">#2</span>
+                                </div>
+                                <span class="vs">vs</span>
+                                <div class="player">
+                                    <span class="player-name">F. Cobolli</span>
+                                    <span class="player-rank">#31</span>
+                                </div>
+                            </div>
+                            <div class="match-info">
+                                <span class="tournament">Wimbledon</span>
+                                <span class="surface">Grass Court</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-cell">
+                        <div class="status-badge live">
+                            <i class="fas fa-circle"></i>
+                            <span>LIVE</span>
+                        </div>
+                        <div class="score">6-4, 3-2</div>
+                    </div>
+                    <div class="odds-cell">
+                        <div class="market-odds">
+                            <div class="odds-value">1.17</div>
+                            <div class="odds-value">4.95</div>
+                        </div>
+                    </div>
+                    <div class="asmar-cell">
+                        <div class="asmar-odds">
+                            <div class="odds-value predicted">1.25</div>
+                            <div class="odds-value predicted">3.95</div>
+                        </div>
+                        <div class="prediction-prob">
+                            <span>79.8% - 20.2%</span>
+                        </div>
+                    </div>
+                    <div class="edge-cell">
+                        <div class="edge positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+6.4%</span>
+                        </div>
+                    </div>
+                    <div class="confidence-cell">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: 92%"></div>
+                            <span class="confidence-text">92%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="match-row" data-status="upcoming">
+                    <div class="match-cell">
+                        <div class="match-players">
+                            <div class="player-matchup">
+                                <div class="player">
+                                    <span class="player-name">N. Djokovic</span>
+                                    <span class="player-rank">#1</span>
+                                </div>
+                                <span class="vs">vs</span>
+                                <div class="player">
+                                    <span class="player-name">J. Sinner</span>
+                                    <span class="player-rank">#4</span>
+                                </div>
+                            </div>
+                            <div class="match-info">
+                                <span class="tournament">Wimbledon</span>
+                                <span class="surface">Grass Court</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-cell">
+                        <div class="status-badge upcoming">
+                            <i class="fas fa-clock"></i>
+                            <span>14:30</span>
+                        </div>
+                        <div class="score">Not Started</div>
+                    </div>
+                    <div class="odds-cell">
+                        <div class="market-odds">
+                            <div class="odds-value">1.65</div>
+                            <div class="odds-value">2.25</div>
+                        </div>
+                    </div>
+                    <div class="asmar-cell">
+                        <div class="asmar-odds">
+                            <div class="odds-value predicted">1.72</div>
+                            <div class="odds-value predicted">2.18</div>
+                        </div>
+                        <div class="prediction-prob">
+                            <span>58% - 42%</span>
+                        </div>
+                    </div>
+                    <div class="edge-cell">
+                        <div class="edge negative">
+                            <i class="fas fa-arrow-down"></i>
+                            <span>-4.1%</span>
+                        </div>
+                    </div>
+                    <div class="confidence-cell">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: 76%"></div>
+                            <span class="confidence-text">76%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="match-row" data-status="upcoming">
+                    <div class="match-cell">
+                        <div class="match-players">
+                            <div class="player-matchup">
+                                <div class="player">
+                                    <span class="player-name">T. Fritz</span>
+                                    <span class="player-rank">#9</span>
+                                </div>
+                                <span class="vs">vs</span>
+                                <div class="player">
+                                    <span class="player-name">A. Zverev</span>
+                                    <span class="player-rank">#3</span>
+                                </div>
+                            </div>
+                            <div class="match-info">
+                                <span class="tournament">Wimbledon</span>
+                                <span class="surface">Grass Court</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-cell">
+                        <div class="status-badge upcoming">
+                            <i class="fas fa-clock"></i>
+                            <span>16:00</span>
+                        </div>
+                        <div class="score">Not Started</div>
+                    </div>
+                    <div class="odds-cell">
+                        <div class="market-odds">
+                            <div class="odds-value">2.10</div>
+                            <div class="odds-value">1.75</div>
+                        </div>
+                    </div>
+                    <div class="asmar-cell">
+                        <div class="asmar-odds">
+                            <div class="odds-value predicted">2.00</div>
+                            <div class="odds-value predicted">1.87</div>
+                        </div>
+                        <div class="prediction-prob">
+                            <span>50% - 50%</span>
+                        </div>
+                    </div>
+                    <div class="edge-cell">
+                        <div class="edge positive">
+                            <i class="fas fa-arrow-up"></i>
+                            <span>+4.8%</span>
+                        </div>
+                    </div>
+                    <div class="confidence-cell">
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: 84%"></div>
+                            <span class="confidence-text">84%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="board-summary">
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>12</h3>
+                        <p>Matches Today</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>7</h3>
+                        <p>Value Opportunities</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>70.6%</h3>
+                        <p>RFSR Accuracy</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>+12.4%</h3>
+                        <p>Avg Edge Found</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>RFSR Ensemble Performance</h2>
+                <p>Advanced metrics and model performance insights</p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-target"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>RFSR Accuracy</h3>
+                        <div class="stat-value">70.6%</div>
+                        <p>Random Forest + Serve/Return ensemble accuracy</p>
+                        <div class="stat-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 70.6%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-area"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>AUC-ROC Score</h3>
+                        <div class="stat-value">0.780</div>
+                        <p>Area under the ROC curve measure</p>
+                        <div class="stat-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 78%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Training Data</h3>
+                        <div class="stat-value">109K+</div>
+                        <p>ATP match records analyzed</p>
+                        <div class="stat-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 90%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Log Loss</h3>
+                        <div class="stat-value">0.569</div>
+                        <p>Lower is better - calibration quality</p>
+                        <div class="stat-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 43%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3>Ensemble Weights</h3>
+                        <div class="stat-value">75/25</div>
+                        <p>Random Forest 75% • Serve/Return 25%</p>
+                        <div class="stat-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 75%"></div>
+                                <div class="progress-fill secondary" style="width: 25%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-importance">
+                <h3>Feature Importance Ranking</h3>
+                <p class="feature-description">Based on Random Forest feature importance analysis</p>
+                <div class="importance-chart">
+                    <div class="importance-item">
+                        <div class="importance-label">ELO Rating Difference</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 100%"></div>
+                            <span class="importance-value">1.000</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Grass ELO Difference</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 85%"></div>
+                            <span class="importance-value">0.850</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Serve Rating Difference</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 75%"></div>
+                            <span class="importance-value">0.750</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Return Rating Difference</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 70%"></div>
+                            <span class="importance-value">0.700</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Recent Form (Last 10)</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 60%"></div>
+                            <span class="importance-value">0.600</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">ATP Ranking Difference</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 55%"></div>
+                            <span class="importance-value">0.550</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Grass Win Rate (Last 10)</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 45%"></div>
+                            <span class="importance-value">0.450</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Serve Rating (Grass)</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 40%"></div>
+                            <span class="importance-value">0.400</span>
+                        </div>
+                    </div>
+                    <div class="importance-item">
+                        <div class="importance-label">Return Rating (Grass)</div>
+                        <div class="importance-bar">
+                            <div class="importance-fill" style="width: 35%"></div>
+                            <span class="importance-value">0.350</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <div class="section-header">
+                        <h2>How RFSR Ensemble Works</h2>
+                        <p>Advanced machine learning meets tennis expertise</p>
+                    </div>
+                    
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <div class="feature-number">01</div>
+                            <div class="feature-content">
+                                <h3>Data Collection</h3>
+                                <p>We analyze 109,312 ATP match records with comprehensive player statistics, surface-specific performance, and historical matchups from 2010-2024.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="about-feature">
+                            <div class="feature-number">02</div>
+                            <div class="feature-content">
+                                <h3>RFSR Ensemble</h3>
+                                <p>Our ensemble combines Random Forest (75%) with specialized Serve/Return analytics (25%) to capture both general tennis patterns and serve-specific insights.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="about-feature">
+                            <div class="feature-number">03</div>
+                            <div class="feature-content">
+                                <h3>Grass Specialization</h3>
+                                <p>Dedicated grass court ELO ratings and surface-specific serve/return metrics optimize predictions for Wimbledon conditions.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="about-visual">
+                    <div class="model-diagram">
+                        <div class="diagram-node input">
+                            <i class="fas fa-database"></i>
+                            <span>109K+ Matches</span>
+                        </div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node process">
+                            <i class="fas fa-cogs"></i>
+                            <span>Feature Engineering</span>
+                        </div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node model">
+                            <div class="ensemble-models">
+                                <div class="model-part rf">
+                                    <i class="fas fa-tree"></i>
+                                    <span>RF (75%)</span>
+                                </div>
+                                <div class="model-part sr">
+                                    <i class="fas fa-bolt"></i>
+                                    <span>SR (25%)</span>
+                                </div>
+                            </div>
+                            <span>RFSR Ensemble</span>
+                        </div>
+                        <div class="diagram-arrow">→</div>
+                        <div class="diagram-node output">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Bias-Free Predictions</span>
+                        </div>
+                    </div>
+                    
+                    <div class="tech-stack">
+                        <h4>Technology Stack</h4>
+                        <div class="tech-badges">
+                            <span class="tech-badge">Python</span>
+                            <span class="tech-badge">Random Forest</span>
+                            <span class="tech-badge">Serve/Return Analytics</span>
+                            <span class="tech-badge">Scikit-learn</span>
+                            <span class="tech-badge">Pandas</span>
+                            <span class="tech-badge">NumPy</span>
+                        </div>
+                    </div>
+
+                    <div class="performance-metrics">
+                        <h4>Model Performance</h4>
+                        <div class="metrics-grid">
+                            <div class="metric">
+                                <span class="metric-label">Accuracy</span>
+                                <span class="metric-value">70.6%</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">AUC-ROC</span>
+                                <span class="metric-value">0.780</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Log Loss</span>
+                                <span class="metric-value">0.569</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Bias Score</span>
+                                <span class="metric-value">0.000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-leaf"></i>
+                    <span>Wimbledon Predictor</span>
+                </div>
+                <div class="footer-links">
+                    <a href="#predictions">Predictions</a>
+                    <a href="#stats">Performance</a>
+                    <a href="#about">About</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Wimbledon Predictor. Professional tennis match predictions powered by RFSR ensemble learning.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html> 

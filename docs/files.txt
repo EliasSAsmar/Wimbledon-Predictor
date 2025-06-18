@@ -1,0 +1,20 @@
+tennis-prediction-engine/
+├── data/
+│   ├── raw/                # Original ATP CSVs
+│   ├── processed/          # Cleaned data
+│   └── features/           # Engineered features
+├── models/
+│   ├── trained_models/     # Serialized models
+│   └── model_metrics/      # Performance reports
+├── src/
+│   ├── data_pipeline.py    # Data loading/cleaning
+│   ├── feature_engine.py   # Feature engineering
+│   ├── model_train.py      # Model training
+│   ├── prediction.py       # Prediction interface
+│   └── utils.py           # Helper functions
+├── notebooks/
+│   ├── exploration.ipynb   # EDA
+│   └── validation.ipynb    # Model analysis
+├── tests/                  # Unit tests
+├── config/                 # YAML configs
+└── app/                    # Future frontend
