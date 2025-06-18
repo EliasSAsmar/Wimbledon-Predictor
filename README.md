@@ -11,7 +11,7 @@ An advanced machine learning system for predicting tennis match outcomes, specif
 ## 🏆 Key Features
 
 - **🎯 70.6% Accuracy** with 0.780 AUC-ROC score
-- **🚫 Zero Bias** - Perfect 0.000 bias score through innovative averaging technique
+- **🚫 Zero Bias** - Perfect 0.000 bias score through averaging technique
 - **🌱 Grass Court Specialized** - Dedicated ELO ratings and surface-specific metrics
 - **🤖 RFSR Ensemble** - Random Forest + Serve/Return analytics combination
 - **📊 109K+ Matches** - Trained on comprehensive ATP data (2010-2024)
