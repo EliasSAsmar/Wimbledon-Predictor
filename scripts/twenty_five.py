@@ -8,9 +8,9 @@ from pathlib import Path
 import logging
 from collections import defaultdict
 
-# Add the current directory to the path to import other modules
+# Add the src directory to the path to import other modules
 import sys
-sys.path.append(str(Path(__file__).parent))
+sys.path.append(str(Path(__file__).parent.parent / "src"))
 
 from feature_engine import TennisFeatureEngine
 
@@ -358,7 +358,7 @@ def main():
     print("=== ATP 2025 Data Processing ===")
     
     # Set up paths
-    data_file = Path("atp_matches/ATP2025.csv")
+    data_file = Path("data/raw/atp2025.csv")
     
     if not data_file.exists():
         print(f"Error: {data_file} not found!")

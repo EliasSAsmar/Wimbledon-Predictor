@@ -6,6 +6,7 @@ from feature_engine import TennisFeatureEngine
 from model_train import ModelTrainer
 from prediction import PredictionInterface
 from ensemble_models import RF_SR_Ensemble  # Import needed for unpickling
+#from utils.odds_api import fetch_wimbledon_odds
 
 def setup_logging():
     """Configure logging"""
@@ -176,49 +177,20 @@ def main():
     
     # List of matches to predict
     match_predictions = [
-        ("Tomas Machac", "Jesper de Jong"),
-        ("Andrey Rublev", "Sebastian Ofner"),
-        ("Tomas Martin Etcheverry", "Pedro Martinez"),
-        ("Flavio Cobolli", "Joao Fonseca"),
-        ("Alex Michelsen", "Francisco Cerundolo"),
-        ("Denis Shapovalov", "Ugo Humbert"),
-        ("Jannik Sinner", "Yannick Hanfmann"),
-        ("Felix Auger-Aliassime", "Laslo Djere"),
-        ("Lorenzo Sonego", "Jan-Lennard Struff"),
-        ("Alexei Popyrin", "Aleksandar Vukic"),
-        ("Brandon Nakashima", "Giovanni Mpetshi Perricard"),
-        ("Jiri Lehecka", "Alex de Minaur"),
-        ("Jack Draper", "Jenson Brooksby"),
-        ("Arthur Rinderknech", "Ben Shelton"),
-        ("Reilly Opelka", "Camilo Ugo Carabelli"),
-        ("Carlos Alcaraz", "Adam Walton"),
-        ("Jaume Munar", "Jordan Thompson"),
-        ("Corentin Moutet", "Taylor Fritz"),
-        ("Gabriel Diallo", "Billy Harris")
+        # ATP Halle
+       ("Carlos Alcaraz", "Jannik Sinner"),
     ]
     
     # Collect predictions for Excel export
-    print("\n📊 Collecting predictions for Excel export...")
-    predictions_for_excel = []
-    
+    print("\n📊 Printing predictions for each match...")
     for player1, player2 in match_predictions:
-        print(f"🔄 Processing: {player1} vs {player2}")
-        
-        # Collect data for Excel
-        prediction_data = collect_prediction_data(predictor, matches, player1, player2, model='ensemble')
-        if prediction_data:
-            predictions_for_excel.append(prediction_data)
-            print(f"  ✅ Data collected successfully")
-        else:
-            print(f"  ❌ Could not collect data - player names may not be found")
-    
-    # Export to Excel
-    print(f"\n📋 Exporting {len(predictions_for_excel)} successful predictions to Excel...")
-    export_predictions_to_excel(predictions_for_excel, "wimbledon_predictions_2024.xlsx")
-    
+        print(f"\n🔄 Processing: {player1} vs {player2}")
+        predict_match(predictor, matches, player1, player2, model='ensemble')
     print("\n" + "="*60)
-    print("🎾 PREDICTION EXPORT COMPLETE")
+    print("🎾 PREDICTION PRINTING COMPLETE")
     print("="*60)
 
 if __name__ == "__main__":
-    main() 
+    main()  
+
+    

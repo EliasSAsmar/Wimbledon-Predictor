@@ -140,21 +140,6 @@ print(f"Probability: {result['win_probability']:.1%}")
 print(f"Betting Odds: {result['american_odds']}")
 ```
 
-## 🔬 Technical Deep Dive
-
-### Bias Elimination Technique
-Our **revolutionary averaging method** ensures zero naming bias:
-
-```python
-# Calculate both directions
-prob_A_beats_B = model.predict_proba(features_AB)
-prob_B_beats_A = model.predict_proba(features_BA)
-
-# Perfect bias elimination
-final_prob = (prob_A_beats_B + (1 - prob_B_beats_A)) / 2
-```
-
-**Result**: Perfect 0.000 bias score across all models.
 
 ### Feature Engineering Pipeline
 1. **ELO Rating System** - Dynamic skill tracking
