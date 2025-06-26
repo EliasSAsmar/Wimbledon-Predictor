@@ -23,7 +23,44 @@ def initialize_engine():
     
     # Load and preprocess data
     matches = data_loader.load_raw_data()
-    feature_engine.build_features(matches)
+    
+    # Load updated ratings instead of rebuilding from scratch
+    import glob
+    import os
+    
+    # Find the most recent ratings file (should be the 2025 updated one)
+    rating_files = glob.glob(f"{feature_engine.cache_dir}/ratings_*.pkl")
+    if rating_files:
+        # Sort by modification time to get the most recent
+        rating_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+        latest_ratings_file = rating_files[0]
+        
+        print(f"Loading updated ratings from: {latest_ratings_file}")
+        
+        try:
+            with open(latest_ratings_file, 'rb') as f:
+                ratings_data = pickle.load(f)
+            
+            # Load all the rating systems
+            feature_engine.player_elos.update(ratings_data['player_elos'])
+            feature_engine.player_serve_ratings.update(ratings_data['player_serve_ratings'])
+            feature_engine.player_return_ratings.update(ratings_data['player_return_ratings'])
+            feature_engine.player_grass_elos.update(ratings_data['player_grass_elos'])
+            feature_engine.player_grass_serve_ratings.update(ratings_data['player_grass_serve_ratings'])
+            feature_engine.player_grass_return_ratings.update(ratings_data['player_grass_return_ratings'])
+            feature_engine.player_last_10.update(ratings_data['player_last_10'])
+            feature_engine.player_grass_last_10.update(ratings_data['player_grass_last_10'])
+            
+            print(f"✅ Loaded updated ratings for {len(feature_engine.player_elos)} players")
+            print(f"✅ Loaded updated grass ratings for {len(feature_engine.player_grass_elos)} players")
+            
+        except Exception as e:
+            print(f"Warning: Could not load updated ratings: {e}")
+            print("Falling back to building features from scratch...")
+            feature_engine.build_features(matches)
+    else:
+        print("No ratings files found, building features from scratch...")
+        feature_engine.build_features(matches)
     
     # Load pre-trained models with correct paths (including RFSR ensemble)
     model_trainer.load_models(
@@ -178,8 +215,7 @@ def main():
     # List of matches to predict
     match_predictions = [
         # ATP Halle
-       ("Carlos Alcaraz", "Jannik Sinner"),
-    ]
+        ("Carlos Alcaraz", "Alexander Zverev"),]
     
     # Collect predictions for Excel export
     print("\n📊 Printing predictions for each match...")

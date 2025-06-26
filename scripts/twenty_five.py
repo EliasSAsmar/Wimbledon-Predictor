@@ -175,15 +175,72 @@ def map_to_existing_format(df: pd.DataFrame) -> pd.DataFrame:
         axis=1
     )
     
-    # Create winner/loser IDs (simplified version)
-    df_mapped['winner_id'] = df_mapped['winner_name'].str.replace(' ', '_').str.lower()
-    df_mapped['loser_id'] = df_mapped['loser_name'].str.replace(' ', '_').str.lower()
+    # Build player ID mapping from existing 2024 data using normalized names
+    print("Building player ID mapping from 2024 data...")
+    player_id_mapping = {}
+    
+    try:
+        # Load 2024 data to get existing player IDs
+        df_2024 = pd.read_csv("data/raw/atp_matches_2024.csv")
+        
+        # Create mapping from normalized player names to IDs
+        for _, row in df_2024.iterrows():
+            winner_name = row['winner_name']
+            loser_name = row['loser_name']
+            winner_id = row['winner_id']
+            loser_id = row['loser_id']
+            
+            if pd.notna(winner_name) and pd.notna(winner_id):
+                # Normalize the name the same way as in normalize_names_with_mapping
+                normalized_winner = normalize_name_for_mapping(winner_name)
+                player_id_mapping[normalized_winner] = winner_id
+                
+            if pd.notna(loser_name) and pd.notna(loser_id):
+                # Normalize the name the same way as in normalize_names_with_mapping
+                normalized_loser = normalize_name_for_mapping(loser_name)
+                player_id_mapping[normalized_loser] = loser_id
+                
+        print(f"Built player ID mapping for {len(player_id_mapping)} players")
+        
+    except Exception as e:
+        print(f"Warning: Could not load 2024 data for ID mapping: {e}")
+        print("Falling back to simple ID generation...")
+        player_id_mapping = {}
+    
+    # Create winner/loser IDs using existing mapping or fallback
+    def get_player_id(player_name):
+        if player_name in player_id_mapping:
+            return player_id_mapping[player_name]
+        else:
+            # Fallback: create simple ID
+            return player_name.replace(' ', '_').lower()
+    
+    df_mapped['winner_id'] = df_mapped['winner_name'].apply(get_player_id)
+    df_mapped['loser_id'] = df_mapped['loser_name'].apply(get_player_id)
     
     # Handle missing data
     df_mapped['player1_rank'] = pd.to_numeric(df_mapped['player1_rank'], errors='coerce')
     df_mapped['player2_rank'] = pd.to_numeric(df_mapped['player2_rank'], errors='coerce')
     
     return df_mapped
+
+def normalize_name_for_mapping(name_str):
+    """
+    Normalize name the same way as in normalize_names_with_mapping
+    """
+    if pd.isna(name_str):
+        return name_str
+    
+    name_str = str(name_str).strip()
+    
+    # If still not found, create a best guess (same logic as in normalize_names_with_mapping)
+    parts = name_str.replace('.', '').split()
+    if len(parts) == 2:
+        last_name, first_initial = parts[0], parts[1]
+        # This is a fallback - would need manual review
+        return f"{first_initial} {last_name}"
+    
+    return name_str
 
 def load_existing_ratings(feature_engine: TennisFeatureEngine) -> bool:
     """
@@ -378,15 +435,18 @@ def main():
         # Step 3: Normalize names using mapping
         df_normalized = normalize_names_with_mapping(df_2025, name_mapping)
         
-        # Step 4: Map to existing format
-        df_mapped = map_to_existing_format(df_normalized)
+        # Step 4: Map to existing format (without ID mapping)
+        df_mapped = map_to_existing_format_basic(df_normalized)
         
-        # Step 5: Save processed 2025 data
+        # Step 5: Apply player ID mapping using normalized names
+        df_mapped = apply_player_id_mapping(df_mapped)
+        
+        # Step 6: Save processed 2025 data
         output_file = Path("atp_matches/atp_matches_2025_processed.csv")
         df_mapped.to_csv(output_file, index=False)
         print(f"Saved processed 2025 data to {output_file}")
         
-        # Step 6: Update ELO ratings
+        # Step 7: Update ELO ratings
         update_elo_ratings(df_mapped)
         
         print("\n=== Processing Complete ===")
@@ -401,6 +461,86 @@ def main():
     except Exception as e:
         print(f"Error in main processing: {e}")
         raise
+
+def map_to_existing_format_basic(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Basic mapping to existing format without player ID mapping
+    """
+    print("Mapping to existing data format...")
+    
+    # Create a mapping dictionary for the columns
+    column_mapping = {
+        'Tournament': 'tourney_name',
+        'Date': 'tourney_date', 
+        'Surface': 'surface',
+        'Round': 'round',
+        'Player_1': 'player1_name',
+        'Player_2': 'player2_name',
+        'Winner': 'winner_name',
+        'Rank_1': 'player1_rank',
+        'Rank_2': 'player2_rank',
+        'Score': 'score'
+    }
+    
+    # Rename columns to match existing format
+    df_mapped = df.rename(columns=column_mapping)
+    
+    # Add missing columns that exist in the current format
+    df_mapped['tourney_id'] = '2025'  # Use year as ID
+    df_mapped['match_num'] = range(1, len(df_mapped) + 1)
+    
+    # Create winner/loser columns based on Winner field
+    df_mapped['loser_name'] = df_mapped.apply(
+        lambda row: row['player2_name'] if row['winner_name'] == row['player1_name'] else row['player1_name'], 
+        axis=1
+    )
+    
+    # Handle missing data
+    df_mapped['player1_rank'] = pd.to_numeric(df_mapped['player1_rank'], errors='coerce')
+    df_mapped['player2_rank'] = pd.to_numeric(df_mapped['player2_rank'], errors='coerce')
+    
+    return df_mapped
+
+def get_initial_last(name):
+    if pd.isna(name):
+        return None
+    parts = str(name).replace('.', '').strip().split()
+    if len(parts) == 1:
+        return parts[0].capitalize()
+    return (parts[0][0].upper() + parts[-1].capitalize())
+
+def apply_player_id_mapping(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Apply player ID mapping using first initial + last name (e.g., CAlcaraz, AZverev)
+    """
+    print("Applying player ID mapping (first initial + last name)...")
+    
+    # Build player ID mapping from 2024 data using initial+last
+    player_id_mapping = {}
+    try:
+        df_2024 = pd.read_csv("data/raw/atp_matches_2024.csv")
+        for _, row in df_2024.iterrows():
+            for name, pid in [(row['winner_name'], row['winner_id']), (row['loser_name'], row['loser_id'])]:
+                key = get_initial_last(name)
+                if key and pd.notna(pid):
+                    player_id_mapping[key] = pid
+        print(f"Built player ID mapping for {len(player_id_mapping)} players")
+    except Exception as e:
+        print(f"Warning: Could not load 2024 data for ID mapping: {e}")
+        print("Falling back to simple ID generation...")
+        player_id_mapping = {}
+    
+    # Assign IDs in 2025 data using the same key
+    def assign_id(name):
+        key = get_initial_last(name)
+        if key in player_id_mapping:
+            return player_id_mapping[key]
+        else:
+            return key  # fallback: use initial+last as ID
+    
+    df['winner_id'] = df['winner_name'].apply(assign_id)
+    df['loser_id'] = df['loser_name'].apply(assign_id)
+    return df
 
 if __name__ == "__main__":
     main()
