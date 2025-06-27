@@ -89,46 +89,21 @@ class PredictionInterface:
         prob1_with_vig = min(prob1_with_vig, 0.99)
         prob2_with_vig = min(prob2_with_vig, 0.99)
         
-        def prob_to_american_odds(prob):
-            """Convert probability to American odds"""
-            if prob >= 0.5:
-                return int(-100 * prob / (1 - prob))
-            else:
-                return int(100 * (1 - prob) / prob)
-        
         def prob_to_decimal_odds(prob):
             """Convert probability to decimal odds"""
             return round(1 / prob, 2)
         
-        def prob_to_fractional_odds(prob):
-            """Convert probability to fractional odds"""
-            decimal = 1 / prob
-            numerator = decimal - 1
-            
-            # Find simple fraction representation
-            for denom in range(1, 21):
-                num = round(numerator * denom)
-                if abs(num/denom - numerator) < 0.01:
-                    return f"{num}/{denom}"
-            
-            # Fallback to decimal if no simple fraction found
-            return f"{numerator:.2f}/1"
-        
         return {
             'player1': {
-                'american': prob_to_american_odds(prob1_with_vig),
                 'decimal': prob_to_decimal_odds(prob1_with_vig),
-                'fractional': prob_to_fractional_odds(prob1_with_vig),
-                'implied_prob': f"{prob1_with_vig:.1%}"
+                'implied_prob': prob1_with_vig
             },
             'player2': {
-                'american': prob_to_american_odds(prob2_with_vig),
                 'decimal': prob_to_decimal_odds(prob2_with_vig),
-                'fractional': prob_to_fractional_odds(prob2_with_vig),
-                'implied_prob': f"{prob2_with_vig:.1%}"
+                'implied_prob': prob2_with_vig
             },
-            'vig_applied': f"{vig:.1%}",
-            'total_implied_prob': f"{prob1_with_vig + prob2_with_vig:.1%}"
+            'vig_applied': vig,
+            'total_implied_prob': prob1_with_vig + prob2_with_vig
         }
     
     def predict_match_outcome(self, player1_name: str, player2_name: str, 
@@ -141,7 +116,7 @@ class PredictionInterface:
         
         This ensures zero bias regardless of player name order.
         """
-        self.logger.info(f"Predicting match: {player1_name} vs {player2_name} (using averaging trick)")
+        self.logger.info(f"Predicting match: {player1_name} vs {player2_name}")
         
         # Get features for both players
         try:

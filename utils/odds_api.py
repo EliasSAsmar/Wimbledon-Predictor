@@ -1,11 +1,12 @@
 import requests
 import logging
 
-API_KEY = "API_KEY"
+API_KEY = "8918f3758b083e5533c7d508b8957223"
 SPORTS_KEY = "tennis_atp_wimbledon"
-BASE_URL = f"https://api.the-odds-api.com/v4/sports/{SPORT_KEY}/odds/"
 
-def fetch_wimbledon_odds(region = 'us', market = 'h2h', odds_format = 'decimal'):
+BASE_URL = f"https://api.the-odds-api.com/v4/sports/{SPORTS_KEY}/odds/"
+
+def fetch_wimbledon_odds(region='us', market='h2h', odds_format='decimal'):
     params = {
         'apiKey': API_KEY,
         'regions': region,
@@ -22,6 +23,7 @@ def fetch_wimbledon_odds(region = 'us', market = 'h2h', odds_format = 'decimal')
     except Exception as e:
         logging.error(f"Failed to fetch odds: {e}")
         return {}
+
 def parse_odds_data(odds_data):
     structured = {}
     for match in odds_data:
@@ -37,7 +39,7 @@ def parse_odds_data(odds_data):
             p2 = market["outcomes"][1]
 
             structured[(home, away)] = {
-                "player1": {"name": p1["name"], "american": p1["price"]},
-                "player2": {"name": p2["name"], "american": p2["price"]}
+                "player1": {"name": p1["name"], "decimal": p1["price"]},
+                "player2": {"name": p2["name"], "decimal": p2["price"]}
             }
     return structured

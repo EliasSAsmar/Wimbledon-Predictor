@@ -113,27 +113,7 @@ def collect_prediction_data(predictor, matches_df, player1, player2, model='ense
         'Recent_Form_Difference': f"{prediction['feature_differences']['last_10_diff']:.2f}"
     }
 
-def export_predictions_to_excel(predictions_list, filename="tennis_predictions.xlsx"):
-    """
-    Export predictions to Excel file
-    """
-    if not predictions_list:
-        print("❌ No predictions to export")
-        return
-    
-    # Create DataFrame
-    df = pd.DataFrame(predictions_list)
-    
-    # Export to Excel
-    try:
-        with pd.ExcelWriter(filename, engine='openpyxl') as writer:
-            df.to_excel(writer, sheet_name='Tennis Predictions', index=False)
-        
-        print(f"✅ Successfully exported {len(predictions_list)} predictions to {filename}")
-        print(f"📊 File saved with columns: {', '.join(df.columns)}")
-        
-    except Exception as e:
-        print(f"❌ Error exporting to Excel: {e}")
+
 
 def predict_match(predictor, matches_df, player1, player2, model='both'):
     """
@@ -154,28 +134,6 @@ def predict_match(predictor, matches_df, player1, player2, model='both'):
         print("❌ Could not make prediction - check player names")
         return
     
-    # Display predictions
-    if 'xgboost' in prediction:
-        print(f"\n🤖 XGBoost Prediction:")
-        print(f"  {player1}: {prediction['xgboost']['player1_win_prob']:.1%}")
-        print(f"  {player2}: {prediction['xgboost']['player2_win_prob']:.1%}")
-        
-        # Display betting odds
-        odds = prediction['xgboost']['betting_odds']
-        print(f"\n💰 XGBoost Betting Odds:")
-        print(f"  {player1}: {odds['player1']['american']:+d}")
-        print(f"  {player2}: {odds['player2']['american']:+d}")
-    
-    if 'random_forest' in prediction:
-        print(f"\n🌲 RandomForest Prediction:")
-        print(f"  {player1}: {prediction['random_forest']['player1_win_prob']:.1%}")
-        print(f"  {player2}: {prediction['random_forest']['player2_win_prob']:.1%}")
-        
-        # Display betting odds
-        odds = prediction['random_forest']['betting_odds']
-        print(f"\n💰 RandomForest Betting Odds:")
-        print(f"  {player1}: {odds['player1']['american']:+d}")
-        print(f"  {player2}: {odds['player2']['american']:+d}")
     
     # Display RFSR ensemble predictions
     if 'rfsr_ensemble' in prediction:
@@ -185,10 +143,10 @@ def predict_match(predictor, matches_df, player1, player2, model='both'):
         print(f"  Weights: {prediction['rfsr_ensemble']['ensemble_weights']}")
         
         # Display betting odds
-        odds = prediction['rfsr_ensemble']['betting_odds']
-        print(f"\n💰 RFSR Ensemble Betting Odds:")
-        print(f"  {player1}: {odds['player1']['american']:+d}")
-        print(f"  {player2}: {odds['player2']['american']:+d}")
+        # odds = prediction['rfsr_ensemble']['betting_odds']
+        # print(f"\n💰 RFSR Ensemble Betting Odds:")
+        # print(f"  {player1}: {odds['player1']['american']:+d}")
+        # print(f"  {player2}: {odds['player2']['american']:+d}")
     
     # Display key features
     print(f"\n📈 Key Feature Differences ({player1} - {player2}):")
@@ -214,8 +172,10 @@ def main():
     
     # List of matches to predict
     match_predictions = [
-        # ATP Halle
-        ("Carlos Alcaraz", "Alexander Zverev"),]
+        # ATP Mallorca
+        ("Carlos Alcaraz", "Jannik Sinner"),
+      
+    ]
     
     # Collect predictions for Excel export
     print("\n📊 Printing predictions for each match...")
