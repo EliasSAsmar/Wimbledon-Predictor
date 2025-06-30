@@ -1,11 +1,17 @@
 import logging
 import pickle
 import pandas as pd
+import sys
+import os
+
+# Add parent directory to path to import utils
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from data_pipeline import TennisDataLoader
 from feature_engine import TennisFeatureEngine
 from model_train import ModelTrainer
 from prediction import PredictionInterface
-from ensemble_models import RF_SR_Ensemble # Import needed for unpickling
+from ensemble_models import RF_SR_Ensemble  # Import needed for unpickling
 from utils.odds_api import fetch_wimbledon_odds
 
 def setup_logging():
@@ -26,7 +32,6 @@ def initialize_engine():
     
     # Load updated ratings instead of rebuilding from scratch
     import glob
-    import os
     
     # Find the most recent ratings file (should be the 2025 updated one)
     rating_files = glob.glob(f"{feature_engine.cache_dir}/ratings_*.pkl")
@@ -71,48 +76,92 @@ def initialize_engine():
     
     return PredictionInterface(feature_engine, model_trainer), matches
 
-def convert_to_implied_probability(decimal_odds):
-    """Convert decimal odds to implied probability."""
-    if decimal_odds == 0:
-        return 0
-    return 1 / decimal_odds
-
-def predict_match_with_ev(predictor, matches_df, player1, player2, odds_info, model='ensemble'):
+def collect_prediction_data(predictor, matches_df, player1, player2, model='ensemble'):
     """
-    Predict match outcome and calculate Expected Value (EV).
+    Collect match prediction data for Excel export
+    Returns a dictionary with prediction data or None if prediction fails
     """
-    print(f"\n🎾 Predicting: {player1} vs {player2}")
-    print("=" * 60)
-
     prediction = predictor.predict_match_outcome(player1, player2, matches_df, model=model)
+    
+    if not prediction:
+        return None
+    
+    # Extract RFSR ensemble data (preferred model)
+    if 'rfsr_ensemble' in prediction:
+        pred_data = prediction['rfsr_ensemble']
+        model_used = 'RFSR Ensemble'
+    elif 'random_forest' in prediction:
+        pred_data = prediction['random_forest']
+        model_used = 'Random Forest'
+    elif 'xgboost' in prediction:
+        pred_data = prediction['xgboost']
+        model_used = 'XGBoost'
+    else:
+        return None
+    
+    # Extract betting odds
+    odds = pred_data['betting_odds']
+    
+    return {
+        'Player_1': player1,
+        'Player_1_Win_Probability': f"{pred_data['player1_win_prob']:.1%}",
+        'Player_1_American_Odds': odds['player1']['american'],
+        'Player_2': player2,
+        'Player_2_Win_Probability': f"{pred_data['player2_win_prob']:.1%}",
+        'Player_2_American_Odds': odds['player2']['american'],
+        'Model_Used': model_used,
+        'Confidence_Split': f"{pred_data['player1_win_prob']:.1%} - {pred_data['player2_win_prob']:.1%}",
+        'Elo_Difference': f"{prediction['feature_differences']['elo_diff']:.1f}",
+        'Grass_Elo_Difference': f"{prediction['feature_differences']['elo_grass_diff']:.1f}",
+        'Serve_Rating_Difference': f"{prediction['feature_differences']['serve_rating_diff']:.1f}",
+        'Return_Rating_Difference': f"{prediction['feature_differences']['return_rating_diff']:.1f}",
+        'Recent_Form_Difference': f"{prediction['feature_differences']['last_10_diff']:.2f}"
+    }
 
+def predict_match_with_odds(predictor, matches_df, player1, player2, vegas_odds=None, model='ensemble'):
+    """
+    Predict match outcome between two players and display with Vegas odds
+    Args:
+        predictor: PredictionInterface instance
+        matches_df: DataFrame containing match data
+        player1: Name of first player
+        player2: Name of second player
+        vegas_odds: Dict containing Vegas odds for both players
+        model: 'both', 'xgboost', 'random_forest', 'rfsr', or 'ensemble'
+    """
+    print(f"\n🎾 {player1} vs {player2}")
+    print("-" * 50)
+    
+    prediction = predictor.predict_match_outcome(player1, player2, matches_df, model=model)
+    
     if not prediction:
         print("❌ Could not make prediction - check player names")
         return
-
-    if 'rfsr_ensemble' not in prediction:
-        print("❌ RFSR Ensemble model not found in prediction output.")
-        return
-
-    pred_data = prediction['rfsr_ensemble']
-    p1_prob = pred_data['player1_win_prob']
-    p2_prob = pred_data['player2_win_prob']
-
-    # Get implied probabilities
-    p1_implied = convert_to_implied_probability(odds_info['player1']['decimal'])
-    p2_implied = convert_to_implied_probability(odds_info['player2']['decimal'])
-
-    # Calculate EV
-    ev1 = (p1_prob * (odds_info['player1']['decimal'] - 1)) - (1 - p1_prob)
-    ev2 = (p2_prob * (odds_info['player2']['decimal'] - 1)) - (1 - p2_prob)
-
-    print(f"  {player1}: {p1_prob:.1%} (My Odds) vs. {p1_implied:.1%} (Implied Odds)")
-    print(f"  {player2}: {p2_prob:.1%} (My Odds) vs. {p2_implied:.1%} (Implied Odds)")
-
-    if ev1 > 0.07:
-        print(f"  🔥 Positive EV found for {player1}: {ev1:.2%}")
-    if ev2 > 0.07:
-        print(f"  🔥 Positive EV found for {player2}: {ev2:.2%}")
+    
+    # Display RFSR ensemble predictions (our preferred model)
+    if 'rfsr_ensemble' in prediction:
+        model_pred = prediction['rfsr_ensemble']
+        print(f"🎯 Model Predictions:")
+        print(f"  {player1}: {model_pred['player1_win_prob']:.1%}")
+        print(f"  {player2}: {model_pred['player2_win_prob']:.1%}")
+    
+    # Display Vegas odds if available
+    if vegas_odds:
+        print(f"💰 Vegas Odds:")
+        # Convert American odds to implied probability
+        def american_to_implied_prob(american_odds):
+            if american_odds > 0:
+                return 100 / (american_odds + 100) * 100
+            else:
+                return abs(american_odds) / (abs(american_odds) + 100) * 100
+        
+        p1_odds = vegas_odds['player1']['decimal']
+        p2_odds = vegas_odds['player2']['decimal']
+        p1_implied = american_to_implied_prob(p1_odds)
+        p2_implied = american_to_implied_prob(p2_odds)
+        
+        print(f"  {vegas_odds['player1']['name']}: {p1_implied:.1f}% ({p1_odds:+.0f})")
+        print(f"  {vegas_odds['player2']['name']}: {p2_implied:.1f}% ({p2_odds:+.0f})")
 
 def main():
     # Setup logging
@@ -126,21 +175,29 @@ def main():
     print("\n" + "="*60)
     print("🎾 WIMBLEDON PREDICTION ENGINE")
     print("="*60)
-
-    # Fetch odds
+    
+    # Fetch current Wimbledon odds from API
+    print("\n📡 Fetching current Wimbledon matches from odds API...")
     odds_data = fetch_wimbledon_odds()
-
+    
     if not odds_data:
-        print("Could not fetch odds. Exiting.")
+        print("❌ No odds data available. Check API connection.")
         return
-
-    # Collect predictions for Excel export
-    print("\n📊 Analyzing matches for positive EV...")
-    for (p1, p2), odds in odds_data.items():
-        predict_match_with_ev(predictor, matches, p1, p2, odds, model='ensemble')
-
+    
+    print(f"✅ Found {len(odds_data)} matches with odds")
+    
+    # Make predictions for all matches
+    print("\n📊 Making predictions for all matches...")
+    
+    for (home_team, away_team), odds_info in odds_data.items():
+        # Extract player names (odds API returns team names, but for tennis it's player names)
+        player1 = odds_info['player1']['name']
+        player2 = odds_info['player2']['name']
+        
+        predict_match_with_odds(predictor, matches, player1, player2, odds_info, model='ensemble')
+    
     print("\n" + "="*60)
-    print("🎾 EV ANALYSIS COMPLETE")
+    print("🎾 ALL PREDICTIONS COMPLETE")
     print("="*60)
 
 if __name__ == "__main__":

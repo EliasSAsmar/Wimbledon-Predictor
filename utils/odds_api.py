@@ -6,7 +6,7 @@ SPORTS_KEY = "tennis_atp_wimbledon"
 
 BASE_URL = f"https://api.the-odds-api.com/v4/sports/{SPORTS_KEY}/odds/"
 
-def fetch_wimbledon_odds(region='us', market='h2h', odds_format='decimal'):
+def fetch_wimbledon_odds(region='us', market='h2h', odds_format='american'):
     params = {
         'apiKey': API_KEY,
         'regions': region,

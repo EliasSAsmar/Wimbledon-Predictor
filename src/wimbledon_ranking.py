@@ -20,17 +20,15 @@ class WimbledonRankingPredictor:
         
         # Top players to consider (based on current ATP rankings and recent form)
         self.top_players = [
-            "Jannik Sinner", "Carlos Alcaraz", "Alexander Zverev", "Jack Draper",
-            "Taylor Fritz", "Novak Djokovic", "Lorenzo Musetti", "Holger Rune",
-            "Daniil Medvedev", "Ben Shelton", "Alex de Minaur", "Frances Tiafoe",
-            "Tommy Paul", "Andrey Rublev", "Jakub Mensik", "Francisco Cerundolo",
-            "Karen Khachanov", "Ugo Humbert", "Grigor Dimitrov", "Alexei Popyrin",
-            "Tomas Machac", "Flavio Cobolli", "Jiri Lehecka", "Stefanos Tsitsipas",
-            "Felix Auger Aliassime", "Alejandro Davidovich Fokina", "Denis Shapovalov",
-            "Alexander Bublik", "Brandon Nakashima", "Alex Michelsen", "Tallon Griekspoor",
-            "Matteo Berrettini"
+            "Jack Draper", "Sebastian Baez", "Raphael Collignon", "Marin Cilic",
+            "James McCabe", "Fabian Marozsan", "Jaume Munar", "Alexander Bublik",
+            "Flavio Cobolli", "Beibit Zhukayev", "Tomas Martin Etcheverry", "Jack Pinnington Jones", 
+            "Marcos Giron", "Camilo Ugo Carabelli", "Hugo Gaston", "Jakub Mensik",
+            "Alex de Minaur", "Roberto Carballes Baena", "Arthur Cazaux", "Adam Walton",
+            "Quentin Halys", "Alexander Holmgren", "Damir Dzumhur", "Tomas Machac",
+            "Alex Michelsen", "Miomir Kecmanovic", "Jesper de Jong", "Christopher Eubanks",
+            "Daniel Evans", "Jay Clarke", "Alexandre Muller", "Novak Djokovic"
         ]
-    
     def get_all_player_features(self) -> Dict[str, Dict]:
         """Get features for all top players"""
         player_features = {}

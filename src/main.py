@@ -172,9 +172,19 @@ def main():
     
     # List of matches to predict
     match_predictions = [
-        # ATP Mallorca
-        ("Carlos Alcaraz", "Jannik Sinner"),
-      
+        ("Adrian Mannarino", "Christopher Connell"),
+        ("Leandro Riedi", "Oliver Tarvet"),
+        ("Mattia Bellucci", "Oliver Crawford"),
+        ("Stefanos Tsitsipas", "Valentin Royer"),
+        ("Felix Auger Aliassime", "James Duckworth"),
+        ("Filip Misolic", "Jan Lennard Struff"),
+        ("Karen Khachanov", "Mackenzie McDonald"),
+        ("Botic van de Zandschulp", "Matteo Arnaldi"),
+        ("Aleksandar Vukic", "Chun-Hsin Tseng"),
+        ("Alex de Minaur", "Roberto Carballes Baena"),
+        ("Fabian Marozsan", "James McCabe"),
+        ("Jack Pinnington Jones", "Tomas Martin Etcheverry"),
+        ("Johannus Monday", "Tommy Paul")
     ]
     
     # Collect predictions for Excel export
