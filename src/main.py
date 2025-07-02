@@ -170,21 +170,14 @@ def main():
     print("🎾 WIMBLEDON PREDICTION ENGINE")
     print("="*60)
     
-    # List of matches to predict
+        # List of matches to predict
     match_predictions = [
-        ("Adrian Mannarino", "Christopher Connell"),
-        ("Leandro Riedi", "Oliver Tarvet"),
-        ("Mattia Bellucci", "Oliver Crawford"),
-        ("Stefanos Tsitsipas", "Valentin Royer"),
-        ("Felix Auger Aliassime", "James Duckworth"),
-        ("Filip Misolic", "Jan Lennard Struff"),
-        ("Karen Khachanov", "Mackenzie McDonald"),
-        ("Botic van de Zandschulp", "Matteo Arnaldi"),
-        ("Aleksandar Vukic", "Chun-Hsin Tseng"),
-        ("Alex de Minaur", "Roberto Carballes Baena"),
-        ("Fabian Marozsan", "James McCabe"),
-        ("Jack Pinnington Jones", "Tomas Martin Etcheverry"),
-        ("Johannus Monday", "Tommy Paul")
+        ("Alex De Minaur", "Arthur Cazaux"),
+        ("Flavio Cobolli", "Jack Pinnington Jones"),
+        ("Adrian Mannarino", "Valentin Royer"),
+        ("F Auger-Aliassime", "JL Struff"),
+        ("Carlos Alcaraz", "Oliver Tarvet"),
+        ("Alejandro Davidovich Fokina", "Botic Van De Zandschulp")
     ]
     
     # Collect predictions for Excel export

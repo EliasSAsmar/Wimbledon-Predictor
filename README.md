@@ -1,4 +1,4 @@
-# 🎾 Wimbledon Prediction Engine
+# Wimbledon Prediction Engine
 
 **A production-ready machine learning system for tennis match predictions with advanced ensemble modeling and real-time rating updates.**
 
@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
 
-## 🎯 Overview
+## Overview
 
 The Wimbledon Prediction Engine is a sophisticated ML pipeline that transforms 15+ years of ATP match data into bias-free tennis predictions. The system uses a **RFSR ensemble** (Random Forest 75% + Serve/Return 25%) with perfect bias elimination and real-time rating updates.
 
@@ -15,8 +15,9 @@ The Wimbledon Prediction Engine is a sophisticated ML pipeline that transforms 1
 - **Bias-Free Predictions**: Ensemble modeling eliminates prediction bias
 - **Production Pipeline**: Automated data processing and model retraining
 - **Professional Architecture**: Modular, scalable, and maintainable codebase
+- **Odds API Integration**: Real-time betting odds comparison
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Raw ATP Data (2010-2025) → Data Pipeline → Feature Engine → RFSR Ensemble → Prediction Interface
@@ -29,13 +30,15 @@ Raw ATP Data (2010-2025) → Data Pipeline → Feature Engine → RFSR Ensemble 
 - **Feature Engine**: Multi-dimensional rating systems (Elo, serve/return, surface-specific)
 - **Model Ensemble**: Random Forest + Serve/Return hybrid for optimal accuracy
 - **Prediction Interface**: Command-line interface with detailed analysis
+- **Odds API**: Real-time betting odds integration
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.8+
 - 8GB RAM (for full dataset processing)
 - ATP match data (2010-2025)
+
 
 ### Installation
 ```bash
@@ -61,14 +64,14 @@ mkdir -p data/raw
 python scripts/fill_gap_2024.py
 python scripts/twenty_five.py
 
-# Make predictions
-python src/main.py
+# Make predictions with odds API integration
+python src/oddsApiMAin.py
 
 # Run analysis notebook
 jupyter notebook notebooks/analysis.ipynb
 ```
 
-## 📊 Model Performance
+## Model Performance
 
 ### Ensemble Accuracy
 - **Overall Accuracy**: 68.2%
@@ -80,7 +83,7 @@ jupyter notebook notebooks/analysis.ipynb
 - **Serve/Return**: Performance-based with surface adjustments
 - **Form Tracking**: Rolling 10-match windows with surface specificity
 
-## 🔧 Technical Details
+## Technical Details
 
 ### Data Processing
 - **Temporal Validation**: Prevents data leakage with strict chronological processing
@@ -101,11 +104,13 @@ ensemble_weights = {
 }
 ```
 
-## 📈 Usage Examples
+
+
+## Usage Examples
 
 ### Command Line Predictions
 ```bash
-python src/main.py
+python src/oddsApiMAin.py
 ```
 
 ### Programmatic Usage
@@ -133,13 +138,14 @@ result = predictor.predict_match_outcome("Carlos Alcaraz", "Jannik Sinner", matc
 print(f"Alcaraz win probability: {result['rfsr_ensemble']['player1_win_prob']:.1%}")
 ```
 
-## 🛠️ Development
+## Development
 
 ### Project Structure
 ```
 wimbledon-predictor/
 ├── src/                    # Core ML pipeline
 │   ├── main.py            # Prediction engine
+│   ├── oddsApiMAin.py     # Odds API integration with AI analysis
 │   ├── feature_engine.py  # Feature engineering pipeline
 │   ├── data_pipeline.py   # Data loading and preprocessing
 │   ├── model_train.py     # Model training and ensemble
@@ -147,6 +153,9 @@ wimbledon-predictor/
 ├── scripts/               # Data processing scripts
 │   ├── fill_gap_2024.py  # Gap filling for missing data
 │   └── twenty_five.py    # 2025 data processing
+├── utils/                 # Utility modules
+│   ├── odds_api.py       # Odds API integration
+│   └── live_odds.py      # Real-time odds fetching
 ├── notebooks/             # Jupyter notebooks for analysis
 ├── models/               # Trained model files
 ├── data/                 # Raw and processed data
@@ -159,19 +168,9 @@ wimbledon-predictor/
 python -m pytest tests/
 ```
 
-### Code Quality
-```bash
-# Linting
-flake8 src/ scripts/
 
-# Type checking
-mypy src/
 
-# Formatting
-black src/ scripts/
-```
-
-## 📊 Analysis & Visualization
+## Analysis & Visualization
 
 ### Jupyter Notebooks
 - `notebooks/analysis.ipynb` - Comprehensive model analysis
@@ -183,32 +182,11 @@ black src/ scripts/
 - Model performance over time
 - Rating system stability analysis
 - Bias elimination verification
+- Odds vs prediction comparisons
 
-## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - ATP for match data
-- Tennis analytics community for methodology insights
-- Open source contributors for supporting libraries
-
-## 📞 Contact
-
-- **Author**: [Your Name]
-- **Email**: [your.email@example.com]
-- **LinkedIn**: [Your LinkedIn]
-- **Portfolio**: [Your Portfolio]
-
----
-
-**Built with ❤️ for tennis analytics and machine learning excellence.** 
+Jeff Sackman
