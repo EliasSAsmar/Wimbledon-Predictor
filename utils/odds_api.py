@@ -1,7 +1,6 @@
 import requests
 import logging
 
-API_KEY = "8918f3758b083e5533c7d508b8957223"
 SPORTS_KEY = "tennis_atp_wimbledon"
 
 BASE_URL = f"https://api.the-odds-api.com/v4/sports/{SPORTS_KEY}/odds/"
